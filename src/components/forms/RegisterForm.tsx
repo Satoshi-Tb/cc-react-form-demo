@@ -5,7 +5,15 @@ import {
   Card, 
   CardContent, 
   Typography, 
-  Alert 
+  Alert,
+  FormControl,
+  FormLabel,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+  Select,
+  MenuItem,
+  FormHelperText
 } from '@mui/material';
 import { FormField } from './FormField';
 import { User, FormState } from '../../types/user';
@@ -20,7 +28,9 @@ const initialValues: User = {
   lastName: '',
   email: '',
   password: '',
-  confirmPassword: ''
+  confirmPassword: '',
+  gender: '',
+  prefecture: ''
 };
 
 const initialTouched = {
@@ -28,7 +38,9 @@ const initialTouched = {
   lastName: false,
   email: false,
   password: false,
-  confirmPassword: false
+  confirmPassword: false,
+  gender: false,
+  prefecture: false
 };
 
 export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
@@ -157,6 +169,97 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
             onBlur={handleFieldBlur}
             required
           />
+
+          <FormControl 
+            fullWidth 
+            margin="normal"
+            error={formState.touched.gender && Boolean(formState.errors.gender)}
+          >
+            <FormLabel component="legend">性別 *</FormLabel>
+            <RadioGroup
+              row
+              name="gender"
+              value={formState.values.gender}
+              onChange={(e) => handleFieldChange('gender', e.target.value)}
+              onBlur={() => handleFieldBlur('gender')}
+            >
+              <FormControlLabel value="male" control={<Radio />} label="男性" />
+              <FormControlLabel value="female" control={<Radio />} label="女性" />
+              <FormControlLabel value="other" control={<Radio />} label="その他" />
+            </RadioGroup>
+            {formState.touched.gender && formState.errors.gender && (
+              <FormHelperText>{formState.errors.gender}</FormHelperText>
+            )}
+          </FormControl>
+
+          <FormControl 
+            fullWidth 
+            margin="normal"
+            error={formState.touched.prefecture && Boolean(formState.errors.prefecture)}
+          >
+            <FormLabel component="legend">都道府県 *</FormLabel>
+            <Select
+              name="prefecture"
+              value={formState.values.prefecture}
+              onChange={(e) => handleFieldChange('prefecture', e.target.value)}
+              onBlur={() => handleFieldBlur('prefecture')}
+              displayEmpty
+            >
+              <MenuItem value="">
+                <em>選択してください</em>
+              </MenuItem>
+              <MenuItem value="hokkaido">北海道</MenuItem>
+              <MenuItem value="aomori">青森県</MenuItem>
+              <MenuItem value="iwate">岩手県</MenuItem>
+              <MenuItem value="miyagi">宮城県</MenuItem>
+              <MenuItem value="akita">秋田県</MenuItem>
+              <MenuItem value="yamagata">山形県</MenuItem>
+              <MenuItem value="fukushima">福島県</MenuItem>
+              <MenuItem value="ibaraki">茨城県</MenuItem>
+              <MenuItem value="tochigi">栃木県</MenuItem>
+              <MenuItem value="gunma">群馬県</MenuItem>
+              <MenuItem value="saitama">埼玉県</MenuItem>
+              <MenuItem value="chiba">千葉県</MenuItem>
+              <MenuItem value="tokyo">東京都</MenuItem>
+              <MenuItem value="kanagawa">神奈川県</MenuItem>
+              <MenuItem value="niigata">新潟県</MenuItem>
+              <MenuItem value="toyama">富山県</MenuItem>
+              <MenuItem value="ishikawa">石川県</MenuItem>
+              <MenuItem value="fukui">福井県</MenuItem>
+              <MenuItem value="yamanashi">山梨県</MenuItem>
+              <MenuItem value="nagano">長野県</MenuItem>
+              <MenuItem value="gifu">岐阜県</MenuItem>
+              <MenuItem value="shizuoka">静岡県</MenuItem>
+              <MenuItem value="aichi">愛知県</MenuItem>
+              <MenuItem value="mie">三重県</MenuItem>
+              <MenuItem value="shiga">滋賀県</MenuItem>
+              <MenuItem value="kyoto">京都府</MenuItem>
+              <MenuItem value="osaka">大阪府</MenuItem>
+              <MenuItem value="hyogo">兵庫県</MenuItem>
+              <MenuItem value="nara">奈良県</MenuItem>
+              <MenuItem value="wakayama">和歌山県</MenuItem>
+              <MenuItem value="tottori">鳥取県</MenuItem>
+              <MenuItem value="shimane">島根県</MenuItem>
+              <MenuItem value="okayama">岡山県</MenuItem>
+              <MenuItem value="hiroshima">広島県</MenuItem>
+              <MenuItem value="yamaguchi">山口県</MenuItem>
+              <MenuItem value="tokushima">徳島県</MenuItem>
+              <MenuItem value="kagawa">香川県</MenuItem>
+              <MenuItem value="ehime">愛媛県</MenuItem>
+              <MenuItem value="kochi">高知県</MenuItem>
+              <MenuItem value="fukuoka">福岡県</MenuItem>
+              <MenuItem value="saga">佐賀県</MenuItem>
+              <MenuItem value="nagasaki">長崎県</MenuItem>
+              <MenuItem value="kumamoto">熊本県</MenuItem>
+              <MenuItem value="oita">大分県</MenuItem>
+              <MenuItem value="miyazaki">宮崎県</MenuItem>
+              <MenuItem value="kagoshima">鹿児島県</MenuItem>
+              <MenuItem value="okinawa">沖縄県</MenuItem>
+            </Select>
+            {formState.touched.prefecture && formState.errors.prefecture && (
+              <FormHelperText>{formState.errors.prefecture}</FormHelperText>
+            )}
+          </FormControl>
 
           {hasErrors(formState.errors) && Object.values(formState.touched).some(Boolean) && (
             <Alert severity="error" sx={{ mt: 2 }}>

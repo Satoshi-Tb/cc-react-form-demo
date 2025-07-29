@@ -31,6 +31,14 @@ export const validateField = (name: keyof User, value: string, allValues?: User)
       if (allValues && value !== allValues.password) return 'パスワードが一致しません';
       return undefined;
 
+    case 'gender':
+      if (!value) return '性別を選択してください';
+      return undefined;
+
+    case 'prefecture':
+      if (!value) return '都道府県を選択してください';
+      return undefined;
+
     default:
       return undefined;
   }
