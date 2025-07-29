@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Box, 
   Button, 
@@ -22,6 +22,7 @@ import {
 import { FormField } from './FormField';
 import { User, FormState } from '../../types/user';
 import { validateField, validateForm, hasErrors } from '../../utils/validation';
+import { useRouter } from 'next/router';
 
 interface RegisterFormProps {
   onSubmit: (userData: User) => void;
@@ -65,17 +66,21 @@ const hobbyOptions = [
 ];
 
 export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
+  const router = useRouter();
   const [formState, setFormState] = useState<FormState>({
     values: initialValues,
     errors: {},
     touched: initialTouched,
     isSubmitting: false
   });
+  const [isDirty, setIsDirty] = useState(false);
 
   const handleFieldChange = (name: string, value: string | string[]) => {
     const fieldName = name as keyof User;
     const newValues = { ...formState.values, [fieldName]: value };
     const fieldError = validateField(fieldName, value, newValues);
+    
+    setIsDirty(true);
     
     setFormState(prev => ({
       ...prev,
@@ -117,6 +122,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
     if (!hasErrors(errors)) {
       try {
         await onSubmit(formState.values);
+        setIsDirty(false);
       } catch (error) {
         console.error('Form submission error:', error);
       }
@@ -124,6 +130,30 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
     
     setFormState(prev => ({ ...prev, isSubmitting: false }));
   };
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    const handleRouteChange = (url: string) => {
+      if (isDirty && !confirm('入力内容が保存されていません。このページを離れますか？')) {
+        router.events.emit('routeChangeError');
+        throw 'Route change aborted';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    router.events.on('routeChangeStart', handleRouteChange);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      router.events.off('routeChangeStart', handleRouteChange);
+    };
+  }, [isDirty, router]);
 
   return (
     <Card sx={{ maxWidth: 500, mx: 'auto', mt: 4 }}>
