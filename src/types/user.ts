@@ -6,6 +6,7 @@ export interface User {
   confirmPassword: string;
   gender: string;
   prefecture: string;
+  hobbies: string[];
 }
 
 export interface ValidationErrors {
@@ -16,6 +17,7 @@ export interface ValidationErrors {
   confirmPassword?: string;
   gender?: string;
   prefecture?: string;
+  hobbies?: string;
 }
 
 export interface FormState {

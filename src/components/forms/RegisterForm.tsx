@@ -13,7 +13,11 @@ import {
   Radio,
   Select,
   MenuItem,
-  FormHelperText
+  FormHelperText,
+  InputLabel,
+  Checkbox,
+  ListItemText,
+  OutlinedInput
 } from '@mui/material';
 import { FormField } from './FormField';
 import { User, FormState } from '../../types/user';
@@ -30,7 +34,8 @@ const initialValues: User = {
   password: '',
   confirmPassword: '',
   gender: '',
-  prefecture: ''
+  prefecture: '',
+  hobbies: []
 };
 
 const initialTouched = {
@@ -40,8 +45,24 @@ const initialTouched = {
   password: false,
   confirmPassword: false,
   gender: false,
-  prefecture: false
+  prefecture: false,
+  hobbies: false
 };
+
+const hobbyOptions = [
+  '読書',
+  '映画鑑賞',
+  '音楽鑑賞',
+  'スポーツ',
+  '料理',
+  '旅行',
+  'ゲーム',
+  '写真撮影',
+  'プログラミング',
+  '園芸',
+  '絵画',
+  '手芸'
+];
 
 export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
   const [formState, setFormState] = useState<FormState>({
@@ -51,7 +72,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
     isSubmitting: false
   });
 
-  const handleFieldChange = (name: string, value: string) => {
+  const handleFieldChange = (name: string, value: string | string[]) => {
     const fieldName = name as keyof User;
     const newValues = { ...formState.values, [fieldName]: value };
     const fieldError = validateField(fieldName, value, newValues);
@@ -258,6 +279,33 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
             </Select>
             {formState.touched.prefecture && formState.errors.prefecture && (
               <FormHelperText>{formState.errors.prefecture}</FormHelperText>
+            )}
+          </FormControl>
+
+          <FormControl 
+            fullWidth 
+            margin="normal"
+            error={formState.touched.hobbies && Boolean(formState.errors.hobbies)}
+          >
+            <InputLabel id="hobbies-label">趣味 *</InputLabel>
+            <Select
+              labelId="hobbies-label"
+              multiple
+              value={formState.values.hobbies}
+              onChange={(e) => handleFieldChange('hobbies', e.target.value as string[])}
+              onBlur={() => handleFieldBlur('hobbies')}
+              input={<OutlinedInput label="趣味 *" />}
+              renderValue={(selected) => (selected as string[]).join(', ')}
+            >
+              {hobbyOptions.map((hobby) => (
+                <MenuItem key={hobby} value={hobby}>
+                  <Checkbox checked={formState.values.hobbies.indexOf(hobby) > -1} />
+                  <ListItemText primary={hobby} />
+                </MenuItem>
+              ))}
+            </Select>
+            {formState.touched.hobbies && formState.errors.hobbies && (
+              <FormHelperText>{formState.errors.hobbies}</FormHelperText>
             )}
           </FormControl>
 
