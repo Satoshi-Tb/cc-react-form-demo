@@ -39,16 +39,6 @@ const initialValues: User = {
   hobbies: []
 };
 
-const initialTouched = {
-  firstName: false,
-  lastName: false,
-  email: false,
-  password: false,
-  confirmPassword: false,
-  gender: false,
-  prefecture: false,
-  hobbies: false
-};
 
 const hobbyOptions = [
   '読書',
@@ -70,7 +60,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
   const [formState, setFormState] = useState<FormState>({
     values: initialValues,
     errors: {},
-    touched: initialTouched,
+    touched: {},
     isSubmitting: false
   });
   const [isDirty, setIsDirty] = useState(false);
@@ -78,44 +68,24 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
   const handleFieldChange = (name: string, value: string | string[]) => {
     const fieldName = name as keyof User;
     const newValues = { ...formState.values, [fieldName]: value };
-    const fieldError = validateField(fieldName, value, newValues);
     
     setIsDirty(true);
     
     setFormState(prev => ({
       ...prev,
-      values: newValues,
-      errors: {
-        ...prev.errors,
-        [fieldName]: fieldError
-      }
+      values: newValues
     }));
   };
 
-  const handleFieldBlur = (name: string) => {
-    const fieldName = name as keyof User;
-    setFormState(prev => ({
-      ...prev,
-      touched: {
-        ...prev.touched,
-        [fieldName]: true
-      }
-    }));
-  };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     
     const errors = validateForm(formState.values);
-    const allTouched = Object.keys(formState.values).reduce((acc, key) => {
-      acc[key as keyof User] = true;
-      return acc;
-    }, {} as Record<keyof User, boolean>);
 
     setFormState(prev => ({
       ...prev,
       errors,
-      touched: allTouched,
       isSubmitting: true
     }));
 
@@ -123,12 +93,12 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
       try {
         await onSubmit(formState.values);
         setIsDirty(false);
+        setFormState(prev => ({ ...prev, isSubmitting: false }));
       } catch (error) {
         console.error('Form submission error:', error);
+        setFormState(prev => ({ ...prev, isSubmitting: false }));
       }
     }
-    
-    setFormState(prev => ({ ...prev, isSubmitting: false }));
   };
 
   useEffect(() => {
@@ -167,10 +137,9 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
             name="firstName"
             label="名前"
             value={formState.values.firstName}
-            error={formState.errors.firstName}
-            touched={formState.touched.firstName}
+            error={formState.isSubmitting ? formState.errors.firstName : undefined}
+            touched={formState.isSubmitting}
             onChange={handleFieldChange}
-            onBlur={handleFieldBlur}
             required
           />
           
@@ -178,10 +147,9 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
             name="lastName"
             label="姓"
             value={formState.values.lastName}
-            error={formState.errors.lastName}
-            touched={formState.touched.lastName}
+            error={formState.isSubmitting ? formState.errors.lastName : undefined}
+            touched={formState.isSubmitting}
             onChange={handleFieldChange}
-            onBlur={handleFieldBlur}
             required
           />
           
@@ -190,10 +158,9 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
             label="メールアドレス"
             type="email"
             value={formState.values.email}
-            error={formState.errors.email}
-            touched={formState.touched.email}
+            error={formState.isSubmitting ? formState.errors.email : undefined}
+            touched={formState.isSubmitting}
             onChange={handleFieldChange}
-            onBlur={handleFieldBlur}
             required
           />
           
@@ -202,10 +169,9 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
             label="パスワード"
             type="password"
             value={formState.values.password}
-            error={formState.errors.password}
-            touched={formState.touched.password}
+            error={formState.isSubmitting ? formState.errors.password : undefined}
+            touched={formState.isSubmitting}
             onChange={handleFieldChange}
-            onBlur={handleFieldBlur}
             required
           />
           
@@ -214,17 +180,16 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
             label="パスワード確認"
             type="password"
             value={formState.values.confirmPassword}
-            error={formState.errors.confirmPassword}
-            touched={formState.touched.confirmPassword}
+            error={formState.isSubmitting ? formState.errors.confirmPassword : undefined}
+            touched={formState.isSubmitting}
             onChange={handleFieldChange}
-            onBlur={handleFieldBlur}
             required
           />
 
           <FormControl 
             fullWidth 
             margin="normal"
-            error={formState.touched.gender && Boolean(formState.errors.gender)}
+            error={formState.isSubmitting && Boolean(formState.errors.gender)}
           >
             <FormLabel component="legend">性別 *</FormLabel>
             <RadioGroup
@@ -232,13 +197,12 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
               name="gender"
               value={formState.values.gender}
               onChange={(e) => handleFieldChange('gender', e.target.value)}
-              onBlur={() => handleFieldBlur('gender')}
             >
               <FormControlLabel value="male" control={<Radio />} label="男性" />
               <FormControlLabel value="female" control={<Radio />} label="女性" />
               <FormControlLabel value="other" control={<Radio />} label="その他" />
             </RadioGroup>
-            {formState.touched.gender && formState.errors.gender && (
+            {formState.isSubmitting && formState.errors.gender && (
               <FormHelperText>{formState.errors.gender}</FormHelperText>
             )}
           </FormControl>
@@ -246,14 +210,13 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
           <FormControl 
             fullWidth 
             margin="normal"
-            error={formState.touched.prefecture && Boolean(formState.errors.prefecture)}
+            error={formState.isSubmitting && Boolean(formState.errors.prefecture)}
           >
             <FormLabel component="legend">都道府県 *</FormLabel>
             <Select
               name="prefecture"
               value={formState.values.prefecture}
               onChange={(e) => handleFieldChange('prefecture', e.target.value)}
-              onBlur={() => handleFieldBlur('prefecture')}
               displayEmpty
             >
               <MenuItem value="">
@@ -307,7 +270,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
               <MenuItem value="kagoshima">鹿児島県</MenuItem>
               <MenuItem value="okinawa">沖縄県</MenuItem>
             </Select>
-            {formState.touched.prefecture && formState.errors.prefecture && (
+            {formState.isSubmitting && formState.errors.prefecture && (
               <FormHelperText>{formState.errors.prefecture}</FormHelperText>
             )}
           </FormControl>
@@ -315,7 +278,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
           <FormControl 
             fullWidth 
             margin="normal"
-            error={formState.touched.hobbies && Boolean(formState.errors.hobbies)}
+            error={formState.isSubmitting && Boolean(formState.errors.hobbies)}
           >
             <InputLabel id="hobbies-label">趣味 *</InputLabel>
             <Select
@@ -323,7 +286,6 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
               multiple
               value={formState.values.hobbies}
               onChange={(e) => handleFieldChange('hobbies', e.target.value as string[])}
-              onBlur={() => handleFieldBlur('hobbies')}
               input={<OutlinedInput label="趣味 *" />}
               renderValue={(selected) => (selected as string[]).join(', ')}
             >
@@ -334,12 +296,12 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
                 </MenuItem>
               ))}
             </Select>
-            {formState.touched.hobbies && formState.errors.hobbies && (
+            {formState.isSubmitting && formState.errors.hobbies && (
               <FormHelperText>{formState.errors.hobbies}</FormHelperText>
             )}
           </FormControl>
 
-          {hasErrors(formState.errors) && Object.values(formState.touched).some(Boolean) && (
+          {formState.isSubmitting && hasErrors(formState.errors) && (
             <Alert severity="error" sx={{ mt: 2 }}>
               入力内容に誤りがあります。各フィールドをご確認ください。
             </Alert>

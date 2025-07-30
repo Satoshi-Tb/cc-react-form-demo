@@ -7,7 +7,7 @@ interface FormFieldProps extends Omit<TextFieldProps, 'onChange' | 'onBlur' | 'e
   error?: string;
   touched?: boolean;
   onChange: (name: string, value: string) => void;
-  onBlur: (name: string) => void;
+  onBlur?: (name: string) => void;
 }
 
 export const FormField: React.FC<FormFieldProps> = ({
@@ -24,7 +24,7 @@ export const FormField: React.FC<FormFieldProps> = ({
   };
 
   const handleBlur = () => {
-    onBlur(name);
+    onBlur?.(name);
   };
 
   return (
@@ -33,7 +33,7 @@ export const FormField: React.FC<FormFieldProps> = ({
       name={name}
       value={value}
       onChange={handleChange}
-      onBlur={handleBlur}
+      onBlur={onBlur ? handleBlur : undefined}
       error={touched && !!error}
       helperText={touched && error}
       fullWidth

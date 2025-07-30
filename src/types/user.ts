@@ -23,6 +23,6 @@ export interface ValidationErrors {
 export interface FormState {
   values: User;
   errors: ValidationErrors;
-  touched: Record<keyof User, boolean>;
+  touched: Partial<Record<keyof User, boolean>>;
   isSubmitting: boolean;
 }
