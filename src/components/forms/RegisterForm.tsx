@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Box, 
-  Button, 
-  Card, 
-  CardContent, 
-  Typography, 
+import React, { useState, useEffect } from "react";
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Typography,
   Alert,
   FormControl,
   FormLabel,
@@ -17,42 +17,41 @@ import {
   InputLabel,
   Checkbox,
   ListItemText,
-  OutlinedInput
-} from '@mui/material';
-import { FormField } from './FormField';
-import { User, FormState } from '../../types/user';
-import { validateField, validateForm, hasErrors } from '../../utils/validation';
-import { useRouter } from 'next/router';
+  OutlinedInput,
+} from "@mui/material";
+import { FormField } from "./FormField";
+import { User, FormState } from "../../types/user";
+import { validateForm, hasErrors } from "../../utils/validation";
+import { useRouter } from "next/router";
 
 interface RegisterFormProps {
   onSubmit: (userData: User) => void;
 }
 
 const initialValues: User = {
-  firstName: '',
-  lastName: '',
-  email: '',
-  password: '',
-  confirmPassword: '',
-  gender: '',
-  prefecture: '',
-  hobbies: []
+  firstName: "",
+  lastName: "",
+  email: "",
+  password: "",
+  confirmPassword: "",
+  gender: "",
+  prefecture: "",
+  hobbies: [],
 };
 
-
 const hobbyOptions = [
-  '読書',
-  '映画鑑賞',
-  '音楽鑑賞',
-  'スポーツ',
-  '料理',
-  '旅行',
-  'ゲーム',
-  '写真撮影',
-  'プログラミング',
-  '園芸',
-  '絵画',
-  '手芸'
+  "読書",
+  "映画鑑賞",
+  "音楽鑑賞",
+  "スポーツ",
+  "料理",
+  "旅行",
+  "ゲーム",
+  "写真撮影",
+  "プログラミング",
+  "園芸",
+  "絵画",
+  "手芸",
 ];
 
 export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
@@ -61,43 +60,46 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
     values: initialValues,
     errors: {},
     touched: {},
-    isSubmitting: false
+    isSubmitting: false,
   });
+  const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
 
   const handleFieldChange = (name: string, value: string | string[]) => {
     const fieldName = name as keyof User;
     const newValues = { ...formState.values, [fieldName]: value };
-    
+
     setIsDirty(true);
-    
-    setFormState(prev => ({
+
+    setFormState((prev) => ({
       ...prev,
-      values: newValues
+      values: newValues,
     }));
   };
 
-
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    
-    const errors = validateForm(formState.values);
 
-    setFormState(prev => ({
+    const errors = validateForm(formState.values);
+    setHasAttemptedSubmit(true);
+
+    setFormState((prev) => ({
       ...prev,
       errors,
-      isSubmitting: true
+      isSubmitting: true,
     }));
 
     if (!hasErrors(errors)) {
       try {
         await onSubmit(formState.values);
         setIsDirty(false);
-        setFormState(prev => ({ ...prev, isSubmitting: false }));
+        setFormState((prev) => ({ ...prev, isSubmitting: false }));
       } catch (error) {
-        console.error('Form submission error:', error);
-        setFormState(prev => ({ ...prev, isSubmitting: false }));
+        console.error("Form submission error:", error);
+        setFormState((prev) => ({ ...prev, isSubmitting: false }));
       }
+    } else {
+      setFormState((prev) => ({ ...prev, isSubmitting: false }));
     }
   };
 
@@ -105,118 +107,141 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (isDirty) {
         e.preventDefault();
-        e.returnValue = '';
+        e.returnValue = "";
       }
     };
 
     const handleRouteChange = (url: string) => {
-      if (isDirty && !confirm('入力内容が保存されていません。このページを離れますか？')) {
-        router.events.emit('routeChangeError');
-        throw 'Route change aborted';
+      if (
+        isDirty &&
+        !confirm("入力内容が保存されていません。このページを離れますか？")
+      ) {
+        router.events.emit("routeChangeError");
+        throw "Route change aborted";
       }
     };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    router.events.on('routeChangeStart', handleRouteChange);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    router.events.on("routeChangeStart", handleRouteChange);
 
     return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      router.events.off('routeChangeStart', handleRouteChange);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      router.events.off("routeChangeStart", handleRouteChange);
     };
   }, [isDirty, router]);
 
   return (
-    <Card sx={{ maxWidth: 500, mx: 'auto', mt: 4 }}>
+    <Card sx={{ maxWidth: 500, mx: "auto", mt: 4 }}>
       <CardContent>
         <Typography variant="h4" component="h1" gutterBottom align="center">
           ユーザー登録
         </Typography>
-        
+
         <Box component="form" onSubmit={handleSubmit} noValidate>
           <FormField
             name="firstName"
             label="名前"
             value={formState.values.firstName}
-            error={formState.isSubmitting ? formState.errors.firstName : undefined}
-            touched={formState.isSubmitting}
+            error={
+              hasAttemptedSubmit ? formState.errors.firstName : undefined
+            }
+            touched={hasAttemptedSubmit}
             onChange={handleFieldChange}
             required
           />
-          
+
           <FormField
             name="lastName"
             label="姓"
             value={formState.values.lastName}
-            error={formState.isSubmitting ? formState.errors.lastName : undefined}
-            touched={formState.isSubmitting}
+            error={
+              hasAttemptedSubmit ? formState.errors.lastName : undefined
+            }
+            touched={hasAttemptedSubmit}
             onChange={handleFieldChange}
             required
           />
-          
+
           <FormField
             name="email"
             label="メールアドレス"
             type="email"
             value={formState.values.email}
-            error={formState.isSubmitting ? formState.errors.email : undefined}
-            touched={formState.isSubmitting}
+            error={hasAttemptedSubmit ? formState.errors.email : undefined}
+            touched={hasAttemptedSubmit}
             onChange={handleFieldChange}
             required
           />
-          
+
           <FormField
             name="password"
             label="パスワード"
             type="password"
             value={formState.values.password}
-            error={formState.isSubmitting ? formState.errors.password : undefined}
-            touched={formState.isSubmitting}
+            error={
+              hasAttemptedSubmit ? formState.errors.password : undefined
+            }
+            touched={hasAttemptedSubmit}
             onChange={handleFieldChange}
             required
           />
-          
+
           <FormField
             name="confirmPassword"
             label="パスワード確認"
             type="password"
             value={formState.values.confirmPassword}
-            error={formState.isSubmitting ? formState.errors.confirmPassword : undefined}
-            touched={formState.isSubmitting}
+            error={
+              hasAttemptedSubmit
+                ? formState.errors.confirmPassword
+                : undefined
+            }
+            touched={hasAttemptedSubmit}
             onChange={handleFieldChange}
             required
           />
 
-          <FormControl 
-            fullWidth 
+          <FormControl
+            fullWidth
             margin="normal"
-            error={formState.isSubmitting && Boolean(formState.errors.gender)}
+            error={hasAttemptedSubmit && Boolean(formState.errors.gender)}
           >
             <FormLabel component="legend">性別 *</FormLabel>
             <RadioGroup
               row
               name="gender"
               value={formState.values.gender}
-              onChange={(e) => handleFieldChange('gender', e.target.value)}
+              onChange={(e) => handleFieldChange("gender", e.target.value)}
             >
               <FormControlLabel value="male" control={<Radio />} label="男性" />
-              <FormControlLabel value="female" control={<Radio />} label="女性" />
-              <FormControlLabel value="other" control={<Radio />} label="その他" />
+              <FormControlLabel
+                value="female"
+                control={<Radio />}
+                label="女性"
+              />
+              <FormControlLabel
+                value="other"
+                control={<Radio />}
+                label="その他"
+              />
             </RadioGroup>
-            {formState.isSubmitting && formState.errors.gender && (
+            {hasAttemptedSubmit && formState.errors.gender && (
               <FormHelperText>{formState.errors.gender}</FormHelperText>
             )}
           </FormControl>
 
-          <FormControl 
-            fullWidth 
+          <FormControl
+            fullWidth
             margin="normal"
-            error={formState.isSubmitting && Boolean(formState.errors.prefecture)}
+            error={
+              hasAttemptedSubmit && Boolean(formState.errors.prefecture)
+            }
           >
             <FormLabel component="legend">都道府県 *</FormLabel>
             <Select
               name="prefecture"
               value={formState.values.prefecture}
-              onChange={(e) => handleFieldChange('prefecture', e.target.value)}
+              onChange={(e) => handleFieldChange("prefecture", e.target.value)}
               displayEmpty
             >
               <MenuItem value="">
@@ -270,43 +295,47 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
               <MenuItem value="kagoshima">鹿児島県</MenuItem>
               <MenuItem value="okinawa">沖縄県</MenuItem>
             </Select>
-            {formState.isSubmitting && formState.errors.prefecture && (
+            {hasAttemptedSubmit && formState.errors.prefecture && (
               <FormHelperText>{formState.errors.prefecture}</FormHelperText>
             )}
           </FormControl>
 
-          <FormControl 
-            fullWidth 
+          <FormControl
+            fullWidth
             margin="normal"
-            error={formState.isSubmitting && Boolean(formState.errors.hobbies)}
+            error={hasAttemptedSubmit && Boolean(formState.errors.hobbies)}
           >
             <InputLabel id="hobbies-label">趣味 *</InputLabel>
             <Select
               labelId="hobbies-label"
               multiple
               value={formState.values.hobbies}
-              onChange={(e) => handleFieldChange('hobbies', e.target.value as string[])}
+              onChange={(e) =>
+                handleFieldChange("hobbies", e.target.value as string[])
+              }
               input={<OutlinedInput label="趣味 *" />}
-              renderValue={(selected) => (selected as string[]).join(', ')}
+              renderValue={(selected) => (selected as string[]).join(", ")}
             >
               {hobbyOptions.map((hobby) => (
                 <MenuItem key={hobby} value={hobby}>
-                  <Checkbox checked={formState.values.hobbies.indexOf(hobby) > -1} />
+                  <Checkbox
+                    checked={formState.values.hobbies.indexOf(hobby) > -1}
+                  />
                   <ListItemText primary={hobby} />
                 </MenuItem>
               ))}
             </Select>
-            {formState.isSubmitting && formState.errors.hobbies && (
+            {hasAttemptedSubmit && formState.errors.hobbies && (
               <FormHelperText>{formState.errors.hobbies}</FormHelperText>
             )}
           </FormControl>
 
-          {formState.isSubmitting && hasErrors(formState.errors) && (
+          {hasAttemptedSubmit && hasErrors(formState.errors) && (
             <Alert severity="error" sx={{ mt: 2 }}>
               入力内容に誤りがあります。各フィールドをご確認ください。
             </Alert>
           )}
-          
+
           <Button
             type="submit"
             fullWidth
@@ -314,7 +343,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
             sx={{ mt: 3, mb: 2 }}
             disabled={formState.isSubmitting}
           >
-            {formState.isSubmitting ? '送信中...' : '登録する'}
+            {formState.isSubmitting ? "送信中..." : "登録する"}
           </Button>
         </Box>
       </CardContent>
